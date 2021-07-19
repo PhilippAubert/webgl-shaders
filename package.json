@@ -1,0 +1,15 @@
+{
+  "name": "webgl-shaders",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "canvas-sketch": "^0.7.4",
+    "three": "^0.130.1"
+  }
+}
