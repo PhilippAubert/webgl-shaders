@@ -23,8 +23,8 @@ const sketch = ({ context }) => {
   renderer.setClearColor("#000", 1);
 
   // Setup a camera
-  const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 100);
-  camera.position.set(0, 0, -4);
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+  camera.position.set(3, 3, -5);
   camera.lookAt(new THREE.Vector3());
 
   // Setup camera controller
@@ -36,16 +36,28 @@ const sketch = ({ context }) => {
   // Setup a geometry
   const geometry = new THREE.SphereGeometry(1, 32, 16);
 
+  const loader = new THREE.TextureLoader(); 
+  const moonTexture = loader.load('moon.bmp'); 
+  const texture = loader.load("earth.bmp"); 
+
   // Setup a material
   const material = new THREE.MeshBasicMaterial({
-    color: "red",
-    wireframe: true
-  });
+   map:texture
+   });
 
   // Setup a mesh with geometry + material
   const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(0,-0.1,0.5);
-  mesh.rotation.set(-3,0,2);
+  scene.add(mesh); 
+
+  const moonMaterial = new THREE.MeshBasicMaterial({
+    map: moonTexture
+  })
+
+  const moonMesh = new THREE.Mesh(geometry, moonMaterial); 
+  moonMesh.position.set(1.5,1,0)
+  moonMesh.scale.setScalar(0.25);
+  scene.add(moonMesh); 
+ 
 
 
   scene.add(mesh);
