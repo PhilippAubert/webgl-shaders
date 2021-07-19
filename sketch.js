@@ -66,9 +66,12 @@ const sketch = ({ context }) => {
 
   scene.add(moonGroup); 
  
-  const light = new THREE.PointLight('white', 3)
-  light.position.set(2,2,3)
-  scene.add(light); 
+  const light = new THREE.PointLight('white', 2)
+  light.position.set(2,2,0)
+  moonGroup.add(light); 
+
+  scene.add(new THREE.GridHelper(5, 15)); 
+  scene.add(new THREE.PointLightHelper(light, 0.15)); 
 
   scene.add(mesh);
 
