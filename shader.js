@@ -23,8 +23,8 @@ const sketch = ({ context }) => {
   renderer.setClearColor("#000", 1);
 
   // Setup a camera
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
-  camera.position.set(3, 3, -5);
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 100);
+  camera.position.set(0, 0, -4);
   camera.lookAt(new THREE.Vector3());
 
   // Setup camera controller
@@ -33,28 +33,34 @@ const sketch = ({ context }) => {
   // Setup your scene
   const scene = new THREE.Scene();
 
-  // Setup a grid
-
-  const gridScale = 10; 
-  scene.add(new THREE.GridHelper(gridScale, 10, "hsl(0,0%,50%)", "hsl(0,0%,70%)")); 
-
   // Setup a geometry
-   const geometry = new THREE.Geometry(); 
+  const geometry = new THREE.BoxGeometry(1, 1, 1);
 
-   geometry.vertices= [
-       new THREE.Vector3(-0.5, 0.5, 0), 
-       new THREE.Vector3(0.5, -0.5, 0), 
-       new THREE.Vector3(-0.5, -0.5, 0)
-   ]; 
+  const vertexShader = /*glsl*/`
+  varying vec2 vUv; 
+    void main() {
+      vUv = uv; 
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position.xyz, 1.0);
+    }
+   `; 
 
-   geometry.faces = [
-       new THREE.Face3(0,1,2)
-   ]; 
+  const fragmentShader = /*glsl */`
+   varying vec2 vUv; 
+   void main(){
+       gl_FragColor = vec4(vec3(vUv.x),1.0); 
+   }
+  `; 
 
-   // Setup the mesh 
+  // Setup a material
+  const material = new THREE.ShaderMaterial({
+    vertexShader, 
+    fragmentShader
+   });
 
-   const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color:"red"})); 
-scene.add(mesh); 
+  // Setup a mesh with geometry + material
+  const mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh);
+
   // draw each frame
   return {
     // Handle resize events here
@@ -66,9 +72,6 @@ scene.add(mesh);
     },
     // Update & render your scene here
     render({ time }) {
-      mesh.rotation.y = time * 0.15; 
-      moonMesh.rotation.y = time * 0.075; 
-      moonGroup.rotation.y = time * 0.5;
       controls.update();
       renderer.render(scene, camera);
     },
