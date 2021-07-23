@@ -5,6 +5,7 @@ global.THREE = require("three");
 require("three/examples/js/controls/OrbitControls");
 
 const canvasSketch = require("canvas-sketch");
+const glslify = require("glslify");
 
 const settings = {
   // Make the loop animated
@@ -20,7 +21,7 @@ const sketch = ({ context }) => {
   });
 
   // WebGL background color
-  renderer.setClearColor("#fff", 1);
+  renderer.setClearColor("#000", 1);
 
   // Setup a camera
   const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 100);
@@ -34,49 +35,47 @@ const sketch = ({ context }) => {
   const scene = new THREE.Scene();
 
   // Setup a geometry
-  const geometry = new THREE.SphereGeometry(1,32,16);
-
-  const vertexShader = /*glsl*/`
-  varying vec2 vUv; 
-    void main() {
-      vUv = uv; 
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position.xyz, 1.0);
-    }
-   `; 
-
-  const fragmentShader = /*glsl */`
-   varying vec2 vUv; 
-   uniform vec3 color; 
-   uniform float time;
-   void main(){
-     vec2 center = vec2(0.5, 0.5); 
-
-     // a % b = mod(a,b) 
-     vec2 q = vUv; 
-     q.x *= 2.0; 
-     vec2 pos = mod(q * 5.0, 1.0); 
-
-     float d = distance(pos, center); 
-
-     float mask = step(0.25 +sin(time + vUv.x * 2.0) *0.25, d);
-
-     mask = 1.0 - mask; 
-
-     vec3 fragColor = mix(color, vec3(1.0), mask); 
-
-     gl_FragColor = vec4(vec3(mask), 1.0);  
-   }
-  `; 
+  const geometry = new THREE.SphereGeometry(1, 32, 32);
 
   // Setup a material
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      time: {value: 0},
-      color: { value: new THREE.Color('#f0f')}
-    }, 
-    vertexShader, 
-    fragmentShader
-   });
+      time: { value: 0 },
+      color: { value: new THREE.Color("pink") },
+      pointColor: { value: new THREE.Color("tomato") }
+    },
+    vertexShader: /*glsl*/ `
+    varying vec3 vPosition;
+    varying vec2 vUv;
+    void main () {
+      vUv = uv;
+      vPosition = position;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+    `,
+    fragmentShader: glslify(/*glsl*/ `
+    uniform vec3 color;
+    uniform vec3 pointColor;
+    uniform float time;
+    varying vec3 vPosition;
+    varying vec2 vUv;
+    
+    #pragma glslify: noise = require('glsl-noise/simplex/3d');
+    void main () {
+      float gridSize = 10.0;
+      vec2 noiseInput = vUv;
+      noiseInput.x *= 2.0;
+      vec2 pos = fract(noiseInput * gridSize);
+      float inside = length(pos - 0.5);
+      vec2 grid = floor(noiseInput * gridSize);
+      float n = noise(vec3(grid, time * 0.5));
+      inside = step(0.25 + (n * 0.25), inside);
+      vec3 fragColor = mix(color, pointColor, inside);
+      
+      gl_FragColor = vec4(fragColor, 1.0);
+    }
+    `)
+  });
 
   // Setup a mesh with geometry + material
   const mesh = new THREE.Mesh(geometry, material);
@@ -93,7 +92,7 @@ const sketch = ({ context }) => {
     },
     // Update & render your scene here
     render({ time }) {
-      material.uniforms.time.value = time; 
+      material.uniforms.time.value = time;
       controls.update();
       renderer.render(scene, camera);
     },
