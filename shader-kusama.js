@@ -34,7 +34,7 @@ const sketch = ({ context }) => {
   const scene = new THREE.Scene();
 
   // Setup a geometry
-  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const geometry = new THREE.SphereGeometry(1,32,16);
 
   const vertexShader = /*glsl*/`
   varying vec2 vUv; 
@@ -52,7 +52,9 @@ const sketch = ({ context }) => {
      vec2 center = vec2(0.5, 0.5); 
 
      // a % b = mod(a,b) 
-     vec2 pos = mod(vUv * 5.0, 1.0); 
+     vec2 q = vUv; 
+     q.x *= 2.0; 
+     vec2 pos = mod(q * 5.0, 1.0); 
 
      float d = distance(pos, center); 
 
@@ -62,7 +64,7 @@ const sketch = ({ context }) => {
 
      vec3 fragColor = mix(color, vec3(1.0), mask); 
 
-     gl_FragColor = vec4(vec3(fragColor), 1.0);  
+     gl_FragColor = vec4(vec3(mask), 1.0);  
    }
   `; 
 
