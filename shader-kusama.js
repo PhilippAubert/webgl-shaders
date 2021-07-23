@@ -41,8 +41,8 @@ const sketch = ({ context }) => {
   const material = new THREE.ShaderMaterial({
     uniforms: {
       time: { value: 0 },
-      color: { value: new THREE.Color("pink") },
-      pointColor: { value: new THREE.Color("tomato") }
+      color: { value: new THREE.Color("#0ff") },
+      pointColor: { value: new THREE.Color("#f0f") }
     },
     vertexShader: /*glsl*/ `
     varying vec3 vPosition;
