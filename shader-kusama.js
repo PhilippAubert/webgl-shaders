@@ -20,7 +20,7 @@ const sketch = ({ context }) => {
   });
 
   // WebGL background color
-  renderer.setClearColor("#000", 1);
+  renderer.setClearColor("#fff", 1);
 
   // Setup a camera
   const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 100);
@@ -49,7 +49,20 @@ const sketch = ({ context }) => {
    uniform vec3 color; 
    uniform float time;
    void main(){
-       gl_FragColor = vec4(vec3(vUv.x + sin(time), vUv.x , vUv.y +cos(time))*color,1.0);  
+     vec2 center = vec2(0.5, 0.5); 
+
+     // a % b = mod(a,b) 
+     vec2 pos = mod(vUv * 5.0, 1.0); 
+
+     float d = distance(pos, center); 
+
+     float mask = step(0.25 +sin(time + vUv.x * 2.0) *0.25, d);
+
+     mask = 1.0 - mask; 
+
+     vec3 fragColor = mix(color, vec3(1.0), mask); 
+
+     gl_FragColor = vec4(vec3(fragColor), 1.0);  
    }
   `; 
 
@@ -57,7 +70,7 @@ const sketch = ({ context }) => {
   const material = new THREE.ShaderMaterial({
     uniforms: {
       time: {value: 0},
-      color: { value: new THREE.Color('#fff')}
+      color: { value: new THREE.Color('#f0f')}
     }, 
     vertexShader, 
     fragmentShader
